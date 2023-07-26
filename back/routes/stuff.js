@@ -6,8 +6,8 @@ const stuffCtrl = require ('../controllers/stuff');
 
 
 
-router.get('/', stuffCtrl.getAllBooks);
 router.post('/', auth, multer, stuffCtrl.createBook);
+router.get('/', stuffCtrl.getAllBooks);
 router.get('/:id', stuffCtrl.getOneBook);
 
 module.exports = router;
