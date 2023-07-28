@@ -34,12 +34,13 @@ exports.modifyBook = ( req, res, next)=>{
     } : { ...req.body} ;
 
     delete bookObject._userId;
+
     Book.findOne({ _id: req.params.id })
       .then((book) => {
-        if (thing.userId != req.auth.userId){
+        if (book.userId !== req.auth.userId){
           res.status(401).json({ message : 'Non-autorisé'})
         } else {
-          Thing.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id})
+          Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id})
             .then(() => res.status(200).json({ message: 'objet modifié'}))
             .catch(error => res.status(401).json({ error }));
       }
@@ -47,4 +48,10 @@ exports.modifyBook = ( req, res, next)=>{
   .catch((error) =>{
     res.status(400).json({error});
   });
+};
+
+exports.deleteBook = ( req, res, next)=>{
+  Book.deleteOne({ _id: req.params.id})
+    .then(()=> res.status(200).json({ message: 'objet supprimé'}))
+    .catch(error => res.status(400).json({ error }))
 };
