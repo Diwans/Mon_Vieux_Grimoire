@@ -55,3 +55,39 @@ exports.deleteBook = ( req, res, next)=>{
     .then(()=> res.status(200).json({ message: 'objet supprimé'}))
     .catch(error => res.status(400).json({ error }))
 };
+
+exports.rateBook = (req, res, next)=>{
+  if ( 0 <= req.body.rating <= 5 ) {
+    const ratingObject = { ...req.body, grade: req.body.rating };
+    delete ratingObject._id;
+    Book.findOne({_id: req.params.id})
+    .then( book =>{
+      const newRate = book.ratings;
+      const userIdArray = newRate.map(rating => rating.userId);
+
+      if (userIdArray.includes(req.auth.userId)){
+        res.status(403).json({ message: 'Vous avez déjà noté ce livre !'})
+      } else {
+        newRate.push(rateObject);
+        const grades = newRate.map(rating => rating.grade);
+        const averageGrades = average.average(grades);
+
+        book.averageRate = averageGrades;
+
+        Book.updateOne({ _id: req.params.id}, { rate: newRate, averageRate: averageGrades, _id: req.params.id})
+          .then( () => {res.status(201).json()})
+          .catch( error => {res.status(400).json({ error })})
+        res.status(200).json(book);
+      }
+    })
+    .catch((error)=>{res.status(404).json({ error })})
+  } else {
+    res.status(400).json({ message: 'la note doit etre comprise entre 0 et 5 '})
+  }
+};
+
+exports.bestRating = ( req, res, next) => {
+  Book.find().sort({ averageRate: -1}).limit(3)
+    .then((books)=>res.status(200).json(books))
+    .catch((error)=>res.status(404).json({ error }))
+};
